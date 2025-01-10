@@ -4,7 +4,7 @@ from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
-from services.balance import check_balance, estimate_cost
+from services.balance import get_balance, calculate_cost
 from utils.promts import PROMT_1
 from utils.logging import logger
 
@@ -42,6 +42,12 @@ async def handle_start(message: Message):
 async def handle_audio(message: Message):
     try:
         logger.info(f"Получено аудио от пользователя {message.from_user.id}")
+
+        # Получаем баланс до выполнения операции
+        before_balance = get_balance()
+        if before_balance is None:
+            await message.answer("Не удалось получить баланс. Проверьте ключ API.")
+            return
 
         # Скачиваем аудиофайл
         file_id = message.audio.file_id
@@ -93,14 +99,20 @@ async def handle_audio(message: Message):
             except TelegramBadRequest as e:
                 logger.error(f"Ошибка при отправке части анализа: {e}")
 
-        # Оценка стоимости операции
-        whisper_cost = estimate_cost(transcription, model="whisper-1")
-        analysis_cost = estimate_cost(analysis, model="gpt-4o")
-        total_cost = whisper_cost + analysis_cost
+        # Получаем баланс после выполнения операции
+        after_balance = get_balance()
+        if after_balance is None:
+            await message.answer("Не удалось получить баланс после операции.")
+            return
 
-        # Проверка баланса
-        balance_info = check_balance()
-        await message.answer(f"{balance_info}\nСтоимость операции: {total_cost} руб.")
+        # Рассчитываем стоимость операции
+        cost = calculate_cost(before_balance, after_balance)
+
+        # Отправляем пользователю текущий баланс и стоимость операции
+        await message.answer(
+            f"Текущий баланс: {after_balance} руб.\n"
+            f"Стоимость операции: {cost} руб."
+        )
 
     except Exception as e:
         logger.error(f"Ошибка при обработке аудио: {e}")
