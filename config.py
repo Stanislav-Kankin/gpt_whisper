@@ -7,6 +7,7 @@ load_dotenv()
 
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN")  # Токен бота
-    WHISPER_JAX_URL = os.getenv("WHISPER_JAX_URL")  # URL для транскрибации
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # API-ключ OpenAI
+
 
 config = Config()

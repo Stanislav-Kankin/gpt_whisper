@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command
-from services.whisper_jax import transcribe_audio
+from services.whisper import transcribe_audio
 
 # Создаем роутер
 router = Router()
@@ -22,7 +22,7 @@ async def handle_audio(message: Message):
     file_path = file.file_path
     await message.bot.download_file(file_path, "audio.mp3")
 
-    # Транскрибация через Hugging Face Spaces (Whisper-JAX)
+    # Транскрибация через OpenAI Whisper
     transcription = await transcribe_audio("audio.mp3")
 
     # Отправляем транскрипцию обратно пользователю
