@@ -1,30 +1,17 @@
 def split_text(text: str, max_length: int = 4096) -> list[str]:
-    """
-    Разбивает текст на части, не превышающие max_length символов.
-    Если текст не содержит переносов строк, разбивает его на равные части.
-    """
+    """Разделяет сообщение на части, сохраняя правильную разметку HTML."""
     parts = []
-    while len(text) > max_length:
-        # Ищем последний перенос строки в пределах max_length
-        part = text[:max_length]
-        last_newline = part.rfind("\n")
-        last_space = part.rfind(" ")
-
-        # Если есть перенос строки, разбиваем по нему
-        if last_newline != -1:
-            split_index = last_newline
-        # Если есть пробел, разбиваем по нему
-        elif last_space != -1:
-            split_index = last_space
-        # Если нет ни переноса строки, ни пробела, разбиваем по max_length
+    start = 0
+    while start < len(text):
+        end = start + max_length
+        if end > len(text):
+            end = len(text)
         else:
-            split_index = max_length
-
-        # Добавляем часть текста
-        parts.append(text[:split_index].strip())
-        text = text[split_index:].strip()
-
-    # Добавляем оставшийся текст
-    if text:
-        parts.append(text)
+            # Найти ближайший пробел или символ новой строки перед end
+            while end > start and text[end] not in (' ', '\n'):
+                end -= 1
+            if end == start:
+                end = start + max_length  # Если нет пробелов, разбиваем по max_length
+        parts.append(text[start:end])
+        start = end
     return parts
