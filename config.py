@@ -7,7 +7,7 @@ load_dotenv()
 
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN")  # Токен бота
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # API-ключ OpenAI
+    PROXY_API_KEY = os.getenv("PROXY_API_KEY")  # API-ключ OpenAI
 
 
 config = Config()
