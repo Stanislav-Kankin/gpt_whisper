@@ -9,7 +9,7 @@ client = OpenAI(
 )
 
 
-async def transcribe_audio(file_path: str) -> str:
+async def transcribe_audio(file_path: str, language: str = "ru") -> str:
     """
     Отправляет аудиофайл на транскрибацию через OpenAI Whisper API.
     Возвращает транскрипцию или сообщение об ошибке.
@@ -18,7 +18,8 @@ async def transcribe_audio(file_path: str) -> str:
         with open(file_path, "rb") as audio_file:
             transcription = client.audio.transcriptions.create(
                 file=audio_file,
-                model="whisper-1"
+                model="whisper-1",
+                language=language  # Указываем язык, если известен
             )
         return transcription.text
     except Exception as e:

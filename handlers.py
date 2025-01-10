@@ -66,17 +66,6 @@ async def handle_audio(message: Message):
         logger.info("Транскрибация завершена")
         logger.info(f"Длина транскрипции: {len(transcription)} символов")
 
-        # Разбиваем транскрипцию на части
-        transcription_parts = split_message(transcription)
-        logger.info(f"Транскрипция разбита на {len(transcription_parts)} частей")
-
-        # Отправляем каждую часть отдельным сообщением
-        for part in transcription_parts:
-            try:
-                await message.answer(f"Транскрипция:\n{part}")
-            except TelegramBadRequest as e:
-                logger.error(f"Ошибка при отправке части транскрипции: {e}")
-
         # Анализ текста через ChatGPT
         prompt = PROMT_1
         analysis = await analyze_text(transcription, prompt)
@@ -110,8 +99,7 @@ async def handle_audio(message: Message):
 
         # Отправляем пользователю текущий баланс и стоимость операции
         await message.answer(
-            f"Текущий баланс: {after_balance} руб.\n"
-            f"Стоимость операции: {cost} руб."
+            f"Текущий баланс: {after_balance} руб."
         )
 
     except Exception as e:
