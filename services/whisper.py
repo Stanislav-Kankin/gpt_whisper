@@ -1,18 +1,15 @@
-import httpx
 from openai import OpenAI
 from config import config
 from utils.logging import logger
+import httpx
 
 # Настройка прокси (если требуется)
-proxies = {
-    "http://": "http://93.113.180.209:8080",  # Замените на ваш прокси
-    "https://": "http://93.113.180.209:8080",  # Замените на ваш прокси
-}
+proxy_url = "http://134.255.179.138:3128"  # Замените на ваш прокси
 
-# Создаем кастомный transport с прокси
-transport = httpx.HTTPTransport(proxy=proxies)
+# Создаем кастомный транспорт с прокси
+transport = httpx.HTTPTransport(proxy=proxy_url)
 
-# Создаем кастомный HTTP-клиент с transport
+# Создаем кастомный HTTP-клиент с транспортом
 http_client = httpx.Client(transport=transport)
 
 # Инициализация клиента OpenAI с кастомным HTTP-клиентом
