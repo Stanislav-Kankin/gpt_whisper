@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
-from services.balance import get_balance, calculate_cost
+from services.balance import get_balance
 from utils.promts import PROMT_1, PROMT_2
 from utils.logging import logger
 import asyncio
@@ -41,7 +41,9 @@ def split_message(text: str, max_length: int = 4096) -> list[str]:
 # Создаем inline кнопки для выбора сценария анализа
 def get_analysis_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Квалификация", callback_data="qualification")],
+        [InlineKeyboardButton(
+            text="Квалификация", callback_data="qualification"
+            )],
         [InlineKeyboardButton(text="Проигрыш", callback_data="loss")]
     ])
     return keyboard
@@ -50,7 +52,9 @@ def get_analysis_keyboard():
 # Создаем inline кнопку "Показать транскрибацию"
 def get_transcription_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Показать транскрибацию", callback_data="show_transcription")]
+        [InlineKeyboardButton(
+            text="Показать транскрибацию", callback_data="show_transcription"
+            )]
     ])
     return keyboard
 
@@ -81,7 +85,9 @@ async def handle_audio(message: Message):
         # Получаем баланс до выполнения операции
         before_balance = get_balance()
         if before_balance is None:
-            await message.answer("Не удалось получить баланс. Проверьте ключ API.")
+            await message.answer(
+                "Не удалось получить баланс. Проверьте ключ API."
+                )
             return
 
         # Скачиваем аудиофайл
@@ -92,7 +98,9 @@ async def handle_audio(message: Message):
         logger.info("Аудиофайл успешно скачан")
 
         # Транскрибация через OpenAI Whisper с временными метками
-        transcription = await transcribe_audio("audio.mp3", return_timestamps=True)
+        transcription = await transcribe_audio(
+            "audio.mp3", return_timestamps=True
+            )
         if transcription.startswith("Ошибка"):
             logger.error(f"Ошибка транскрибации: {transcription}")
             await message.answer(transcription)
@@ -105,7 +113,9 @@ async def handle_audio(message: Message):
         user_data[message.from_user.id] = {"transcription": transcription}
 
         # Отправляем сообщение с выбором сценария анализа
-        await message.answer("Выбери сценарий анализа", reply_markup=get_analysis_keyboard())
+        await message.answer(
+            "Выбери сценарий анализа", reply_markup=get_analysis_keyboard()
+            )
 
     except Exception as e:
         logger.error(f"Ошибка при обработке аудио: {e}")
@@ -150,17 +160,13 @@ async def handle_qualification(callback: CallbackQuery):
     # Получаем баланс после выполнения операции
     after_balance = get_balance()
     if after_balance is None:
-        await callback.message.answer("Не удалось получить баланс после операции.")
+        await callback.message.answer(
+            "Не удалось получить баланс после операции."
+            )
         return
 
-    # Рассчитываем стоимость операции
-    cost = calculate_cost(before_balance, after_balance)
-
-    # Отправляем пользователю текущий баланс и стоимость операции
-    await callback.message.answer(
-        f"Текущий баланс: {after_balance} руб.\n"
-        f"Стоимость операции: {cost} руб."
-    )
+    # Отправляем пользователю текущий баланс
+    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
     await callback.answer()
 
@@ -203,17 +209,13 @@ async def handle_loss(callback: CallbackQuery):
     # Получаем баланс после выполнения операции
     after_balance = get_balance()
     if after_balance is None:
-        await callback.message.answer("Не удалось получить баланс после операции.")
+        await callback.message.answer(
+            "Не удалось получить баланс после операции."
+            )
         return
 
-    # Рассчитываем стоимость операции
-    cost = calculate_cost(before_balance, after_balance)
-
-    # Отправляем пользователю текущий баланс и стоимость операции
-    await callback.message.answer(
-        f"Текущий баланс: {after_balance} руб.\n"
-        f"Стоимость операции: {cost} руб."
-    )
+    # Отправляем пользователю текущий баланс
+    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
     await callback.answer()
 
@@ -228,6 +230,12 @@ async def handle_show_transcription(callback: CallbackQuery):
         await callback.answer("Транскрипция не найдена.")
         return
 
-    # Отправляем транскрибацию пользователю
-    await callback.message.answer(f"Транскрибация:\n{transcription}")
+    # Разбиваем транскрибацию на части и отправляем
+    transcription_parts = split_message(transcription)
+    for part in transcription_parts:
+        try:
+            await callback.message.answer(f"Транскрибация:\n{part}")
+        except TelegramBadRequest as e:
+            logger.error(f"Ошибка при отправке части транскрибации: {e}")
+
     await callback.answer()
