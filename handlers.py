@@ -7,9 +7,10 @@ from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
-from services.balance import get_balance
+from services.balance import get_balance, calculate_cost
 from utils.promts import PROMT_1, PROMT_2
 from utils.logging import logger
+import asyncio
 
 # Создаем роутер
 router = Router()
@@ -37,7 +38,7 @@ def split_message(text: str, max_length: int = 4096) -> list[str]:
     return parts
 
 
-# Создаем inline кнопки
+# Создаем inline кнопки для выбора сценария анализа
 def get_analysis_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Квалификация", callback_data="qualification")],
@@ -46,10 +47,29 @@ def get_analysis_keyboard():
     return keyboard
 
 
+# Создаем inline кнопку "Показать транскрибацию"
+def get_transcription_keyboard():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Показать транскрибацию", callback_data="show_transcription")]
+    ])
+    return keyboard
+
+
 # Обработчик команды /start
 @router.message(Command("start"))
 async def handle_start(message: Message):
     await message.answer("Привет! Отправь мне аудиофайл в формате mp3.")
+
+
+# Обработчик команды /balance
+@router.message(Command("balance"))
+async def handle_balance(message: Message):
+    """Обработчик команды для запроса текущего баланса."""
+    balance = get_balance()
+    if balance is None:
+        await message.answer("Не удалось получить баланс. Проверьте ключ API.")
+        return
+    await message.answer(f"Текущий баланс: {balance} руб.")
 
 
 # Обработчик аудиофайлов
@@ -118,6 +138,30 @@ async def handle_qualification(callback: CallbackQuery):
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
+    # Добавляем кнопку "Показать транскрибацию"
+    await callback.message.answer(
+        "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
+        reply_markup=get_transcription_keyboard()
+    )
+
+    # Задержка перед выводом баланса
+    await asyncio.sleep(5)
+
+    # Получаем баланс после выполнения операции
+    after_balance = get_balance()
+    if after_balance is None:
+        await callback.message.answer("Не удалось получить баланс после операции.")
+        return
+
+    # Рассчитываем стоимость операции
+    cost = calculate_cost(before_balance, after_balance)
+
+    # Отправляем пользователю текущий баланс и стоимость операции
+    await callback.message.answer(
+        f"Текущий баланс: {after_balance} руб.\n"
+        f"Стоимость операции: {cost} руб."
+    )
+
     await callback.answer()
 
 
@@ -147,4 +191,43 @@ async def handle_loss(callback: CallbackQuery):
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
+    # Добавляем кнопку "Показать транскрибацию"
+    await callback.message.answer(
+        "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
+        reply_markup=get_transcription_keyboard()
+    )
+
+    # Задержка перед выводом баланса
+    await asyncio.sleep(5)
+
+    # Получаем баланс после выполнения операции
+    after_balance = get_balance()
+    if after_balance is None:
+        await callback.message.answer("Не удалось получить баланс после операции.")
+        return
+
+    # Рассчитываем стоимость операции
+    cost = calculate_cost(before_balance, after_balance)
+
+    # Отправляем пользователю текущий баланс и стоимость операции
+    await callback.message.answer(
+        f"Текущий баланс: {after_balance} руб.\n"
+        f"Стоимость операции: {cost} руб."
+    )
+
+    await callback.answer()
+
+
+# Обработчик кнопки "Показать транскрибацию"
+@router.callback_query(F.data == "show_transcription")
+async def handle_show_transcription(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    transcription = user_data.get(user_id, {}).get("transcription")
+
+    if not transcription:
+        await callback.answer("Транскрипция не найдена.")
+        return
+
+    # Отправляем транскрибацию пользователю
+    await callback.message.answer(f"Транскрибация:\n{transcription}")
     await callback.answer()
