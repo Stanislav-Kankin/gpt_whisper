@@ -10,7 +10,7 @@ from services.analyzer import analyze_text
 from services.balance import get_balance
 from utils.promts import PROMT_1, PROMT_2
 from utils.logging import logger
-import asyncio
+# import asyncio
 
 # Создаем роутер
 router = Router()
@@ -22,19 +22,25 @@ user_data = {}
 def split_message(text: str, max_length: int = 4096) -> list[str]:
     """Разделяет сообщение на части, сохраняя правильную разметку HTML."""
     parts = []
-    start = 0
-    while start < len(text):
-        end = start + max_length
-        if end > len(text):
-            end = len(text)
+    while len(text) > 0:
+        if len(text) <= max_length:
+            parts.append(text)
+            break
+        part = text[:max_length]
+        last_newline = part.rfind('\n')  # Ищем последний перенос строки
+        if last_newline == -1:
+            # Если переносов строки нет, разбиваем по последнему пробелу
+            last_space = part.rfind(' ')
+            if last_space == -1:
+                # Если пробелов нет, разбиваем по max_length
+                parts.append(part)
+                text = text[max_length:]
+            else:
+                parts.append(text[:last_space])
+                text = text[last_space + 1:]
         else:
-            # Найти ближайший пробел или символ новой строки перед end
-            while end > start and text[end] not in (' ', '\n'):
-                end -= 1
-            if end == start:
-                end = start + max_length
-        parts.append(text[start:end])
-        start = end
+            parts.append(text[:last_newline])
+            text = text[last_newline + 1:]
     return parts
 
 
@@ -71,7 +77,9 @@ async def handle_balance(message: Message):
     """Обработчик команды для запроса текущего баланса."""
     balance = get_balance()
     if balance is None:
-        await message.answer("Не удалось получить баланс. Проверьте ключ API.")
+        await message.answer(
+            "Не удалось получить баланс. Проверьте ключ API."
+            )
         return
     await message.answer(f"Текущий баланс: {balance} руб.")
 
@@ -125,11 +133,14 @@ async def handle_audio(message: Message):
 # Обработчик выбора "Квалификация"
 @router.callback_query(F.data == "qualification")
 async def handle_qualification(callback: CallbackQuery):
+    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
+    await callback.answer()
+
     user_id = callback.from_user.id
     transcription = user_data.get(user_id, {}).get("transcription")
 
     if not transcription:
-        await callback.answer("Транскрипция не найдена.")
+        await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Анализ текста через ChatGPT по первому промту
@@ -154,9 +165,6 @@ async def handle_qualification(callback: CallbackQuery):
         reply_markup=get_transcription_keyboard()
     )
 
-    # Задержка перед выводом баланса
-    await asyncio.sleep(5)
-
     # Получаем баланс после выполнения операции
     after_balance = get_balance()
     if after_balance is None:
@@ -168,17 +176,18 @@ async def handle_qualification(callback: CallbackQuery):
     # Отправляем пользователю текущий баланс
     await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
-    await callback.answer()
-
 
 # Обработчик выбора "Проигрыш"
 @router.callback_query(F.data == "loss")
 async def handle_loss(callback: CallbackQuery):
+    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
+    await callback.answer()
+
     user_id = callback.from_user.id
     transcription = user_data.get(user_id, {}).get("transcription")
 
     if not transcription:
-        await callback.answer("Транскрипция не найдена.")
+        await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Анализ текста через ChatGPT по второму промту
@@ -203,9 +212,6 @@ async def handle_loss(callback: CallbackQuery):
         reply_markup=get_transcription_keyboard()
     )
 
-    # Задержка перед выводом баланса
-    await asyncio.sleep(5)
-
     # Получаем баланс после выполнения операции
     after_balance = get_balance()
     if after_balance is None:
@@ -217,17 +223,18 @@ async def handle_loss(callback: CallbackQuery):
     # Отправляем пользователю текущий баланс
     await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
-    await callback.answer()
-
 
 # Обработчик кнопки "Показать транскрибацию"
 @router.callback_query(F.data == "show_transcription")
 async def handle_show_transcription(callback: CallbackQuery):
+    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
+    await callback.answer()
+
     user_id = callback.from_user.id
     transcription = user_data.get(user_id, {}).get("transcription")
 
     if not transcription:
-        await callback.answer("Транскрипция не найдена.")
+        await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Разбиваем транскрибацию на части и отправляем
@@ -237,5 +244,3 @@ async def handle_show_transcription(callback: CallbackQuery):
             await callback.message.answer(f"Транскрибация:\n{part}")
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части транскрибации: {e}")
-
-    await callback.answer()
