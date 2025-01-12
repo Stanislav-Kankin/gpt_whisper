@@ -9,7 +9,7 @@ client = OpenAI(
 )
 
 
-async def transcribe_audio(file_path: str, language: str = "ru") -> str:
+async def transcribe_audio(file_path: str, language: str = "ru", return_timestamps: bool = False) -> str:
     """
     Отправляет аудиофайл на транскрибацию через OpenAI Whisper API.
     Возвращает транскрипцию или сообщение об ошибке.
@@ -19,8 +19,18 @@ async def transcribe_audio(file_path: str, language: str = "ru") -> str:
             transcription = client.audio.transcriptions.create(
                 file=audio_file,
                 model="whisper-1",
-                language=language  # Указываем язык, если известен
+                language=language,  # Указываем язык, если известен
+                response_format="verbose_json" if return_timestamps else "json"
             )
+        if return_timestamps:
+            # Формируем текст с временными метками
+            text_with_timestamps = []
+            for segment in transcription.segments:
+                start_time = segment.start  # Используем атрибуты объекта
+                end_time = segment.end
+                text = segment.text
+                text_with_timestamps.append(f"[{start_time:.2f}-{end_time:.2f}] {text}")
+            return "\n".join(text_with_timestamps)
         return transcription.text
     except Exception as e:
         logger.error(f"Ошибка при транскрибации: {e}")

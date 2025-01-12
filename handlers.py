@@ -1,15 +1,21 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import (
+    Message, CallbackQuery,
+    InlineKeyboardMarkup, InlineKeyboardButton
+    )
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
-from services.balance import get_balance, calculate_cost
-from utils.promts import PROMT_1
+from services.balance import get_balance
+from utils.promts import PROMT_1, PROMT_2
 from utils.logging import logger
 
 # Создаем роутер
 router = Router()
+
+# Глобальный словарь для хранения данных пользователя
+user_data = {}
 
 
 def split_message(text: str, max_length: int = 4096) -> list[str]:
@@ -29,6 +35,15 @@ def split_message(text: str, max_length: int = 4096) -> list[str]:
         parts.append(text[start:end])
         start = end
     return parts
+
+
+# Создаем inline кнопки
+def get_analysis_keyboard():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Квалификация", callback_data="qualification")],
+        [InlineKeyboardButton(text="Проигрыш", callback_data="loss")]
+    ])
+    return keyboard
 
 
 # Обработчик команды /start
@@ -56,8 +71,8 @@ async def handle_audio(message: Message):
         await message.bot.download_file(file_path, "audio.mp3")
         logger.info("Аудиофайл успешно скачан")
 
-        # Транскрибация через OpenAI Whisper
-        transcription = await transcribe_audio("audio.mp3")
+        # Транскрибация через OpenAI Whisper с временными метками
+        transcription = await transcribe_audio("audio.mp3", return_timestamps=True)
         if transcription.startswith("Ошибка"):
             logger.error(f"Ошибка транскрибации: {transcription}")
             await message.answer(transcription)
@@ -66,42 +81,70 @@ async def handle_audio(message: Message):
         logger.info("Транскрибация завершена")
         logger.info(f"Длина транскрипции: {len(transcription)} символов")
 
-        # Анализ текста через ChatGPT
-        prompt = PROMT_1
-        analysis = await analyze_text(transcription, prompt)
-        if analysis.startswith("Ошибка"):
-            logger.error(f"Ошибка анализа текста: {analysis}")
-            await message.answer(analysis)
-            return
+        # Сохраняем транскрипцию в контексте пользователя
+        user_data[message.from_user.id] = {"transcription": transcription}
 
-        logger.info("Анализ текста завершен")
-        logger.info(f"Длина анализа: {len(analysis)} символов")
-
-        # Разбиваем анализ на части
-        analysis_parts = split_message(analysis)
-        logger.info(f"Анализ разбит на {len(analysis_parts)} частей")
-
-        # Отправляем каждую часть отдельным сообщением
-        for part in analysis_parts:
-            try:
-                await message.answer(f"Анализ текста:\n{part}")
-            except TelegramBadRequest as e:
-                logger.error(f"Ошибка при отправке части анализа: {e}")
-
-        # Получаем баланс после выполнения операции
-        after_balance = get_balance()
-        if after_balance is None:
-            await message.answer("Не удалось получить баланс после операции.")
-            return
-
-        # Рассчитываем стоимость операции
-        cost = calculate_cost(before_balance, after_balance)
-
-        # Отправляем пользователю текущий баланс и стоимость операции
-        await message.answer(
-            f"Текущий баланс: {after_balance} руб."
-        )
+        # Отправляем сообщение с выбором сценария анализа
+        await message.answer("Выбери сценарий анализа", reply_markup=get_analysis_keyboard())
 
     except Exception as e:
         logger.error(f"Ошибка при обработке аудио: {e}")
         await message.answer(f"Произошла ошибка при обработке аудио: {e}")
+
+
+# Обработчик выбора "Квалификация"
+@router.callback_query(F.data == "qualification")
+async def handle_qualification(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    transcription = user_data.get(user_id, {}).get("transcription")
+
+    if not transcription:
+        await callback.answer("Транскрипция не найдена.")
+        return
+
+    # Анализ текста через ChatGPT по первому промту
+    prompt = PROMT_1
+    analysis = await analyze_text(transcription, prompt)
+    if analysis.startswith("Ошибка"):
+        logger.error(f"Ошибка анализа текста: {analysis}")
+        await callback.message.answer(analysis)
+        return
+
+    # Разбиваем анализ на части и отправляем
+    analysis_parts = split_message(analysis)
+    for part in analysis_parts:
+        try:
+            await callback.message.answer(f"Анализ текста:\n{part}")
+        except TelegramBadRequest as e:
+            logger.error(f"Ошибка при отправке части анализа: {e}")
+
+    await callback.answer()
+
+
+# Обработчик выбора "Проигрыш"
+@router.callback_query(F.data == "loss")
+async def handle_loss(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    transcription = user_data.get(user_id, {}).get("transcription")
+
+    if not transcription:
+        await callback.answer("Транскрипция не найдена.")
+        return
+
+    # Анализ текста через ChatGPT по второму промту
+    prompt = PROMT_2
+    analysis = await analyze_text(transcription, prompt)
+    if analysis.startswith("Ошибка"):
+        logger.error(f"Ошибка анализа текста: {analysis}")
+        await callback.message.answer(analysis)
+        return
+
+    # Разбиваем анализ на части и отправляем
+    analysis_parts = split_message(analysis)
+    for part in analysis_parts:
+        try:
+            await callback.message.answer(f"Анализ текста:\n{part}")
+        except TelegramBadRequest as e:
+            logger.error(f"Ошибка при отправке части анализа: {e}")
+
+    await callback.answer()
