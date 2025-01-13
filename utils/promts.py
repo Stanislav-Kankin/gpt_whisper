@@ -1,7 +1,7 @@
 import tiktoken
 
-# Инициализация кодировщика для модели gpt-3.5-turbo
-encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+# Инициализация кодировщика (проверяем сколько токенов)
+encoding = tiktoken.encoding_for_model("gpt-4o")
 
 PROMT_1 = """
 Прочитай текст звонка и выдели только ту информацию, которую озвучил клиент.
