@@ -104,6 +104,7 @@ async def handle_audio(message: Message):
         file_path = file.file_path
         await message.bot.download_file(file_path, "audio.mp3")
         logger.info("Аудиофайл успешно скачан")
+        await message.answer("Скачал файл, идёт транскрибация.")
 
         # Транскрибация через OpenAI Whisper с временными метками
         transcription = await transcribe_audio(
@@ -122,7 +123,10 @@ async def handle_audio(message: Message):
 
         # Отправляем сообщение с выбором сценария анализа
         await message.answer(
-            "Выбери сценарий анализа", reply_markup=get_analysis_keyboard()
+            "Выбери сценарий анализа:\n"
+            "1. Стандартная квалификация\n"
+            "2. Анализ звонка в проигрыше",
+            reply_markup=get_analysis_keyboard()
             )
 
     except Exception as e:
