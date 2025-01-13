@@ -4,7 +4,7 @@ from utils.logging import logger
 
 # Инициализация клиента OpenAI с использованием ProxyAPI
 client = OpenAI(
-    api_key=config.PROXY_API_KEY,  # Ваш ключ ProxyAPI
+    api_key=config.PROXY_API_KEY,  # ключ ProxyAPI
     base_url="https://api.proxyapi.ru/openai/v1"  # Базовый URL ProxyAPI
 )
 

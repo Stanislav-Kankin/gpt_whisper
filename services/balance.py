@@ -25,7 +25,9 @@ def get_balance() -> float:
             balance = response.json().get("balance")
             return float(balance)  # Преобразуем баланс в число
         else:
-            logger.error(f"Ошибка при получении баланса: {response.status_code}, {response.text}")
+            logger.error(
+                f"Ошибка при получении баланса: {response.status_code}, {response.text}"
+                )
             return None
     except Exception as e:
         logger.error(f"Ошибка при получении баланса: {e}")
