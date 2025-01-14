@@ -170,3 +170,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 audio.mp3
+bot_data.db

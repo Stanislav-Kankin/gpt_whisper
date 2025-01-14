@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.types import (
     Message, CallbackQuery,
     InlineKeyboardMarkup, InlineKeyboardButton
-    )
+)
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
@@ -10,13 +10,10 @@ from services.analyzer import analyze_text
 from services.balance import get_balance
 from utils.promts import PROMT_1, PROMT_2
 from utils.logging import logger
-# import asyncio
+from models import SessionLocal, UserData
 
 # Создаем роутер
 router = Router()
-
-# Глобальный словарь для хранения данных пользователя
-user_data = {}
 
 
 def split_message(text: str, max_length: int = 4096) -> list[str]:
@@ -49,7 +46,7 @@ def get_analysis_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="Квалификация", callback_data="qualification"
-            )],
+        )],
         [InlineKeyboardButton(text="Проигрыш", callback_data="loss")]
     ])
     return keyboard
@@ -60,7 +57,7 @@ def get_transcription_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="Показать транскрибацию", callback_data="show_transcription"
-            )]
+        )]
     ])
     return keyboard
 
@@ -79,7 +76,7 @@ async def handle_balance(message: Message):
     if balance is None:
         await message.answer(
             "Не удалось получить баланс. Проверьте ключ API."
-            )
+        )
         return
     await message.answer(f"Текущий баланс: {balance} руб.")
 
@@ -95,7 +92,7 @@ async def handle_audio(message: Message):
         if before_balance is None:
             await message.answer(
                 "Не удалось получить баланс. Проверьте ключ API."
-                )
+            )
             return
 
         # Скачиваем аудиофайл
@@ -109,7 +106,7 @@ async def handle_audio(message: Message):
         # Транскрибация через OpenAI Whisper с временными метками
         transcription = await transcribe_audio(
             "audio.mp3", return_timestamps=True
-            )
+        )
         if transcription.startswith("Ошибка"):
             logger.error(f"Ошибка транскрибации: {transcription}")
             await message.answer(transcription)
@@ -118,8 +115,20 @@ async def handle_audio(message: Message):
         logger.info("Транскрибация завершена")
         logger.info(f"Длина транскрипции: {len(transcription)} символов")
 
-        # Сохраняем транскрипцию в контексте пользователя
-        user_data[message.from_user.id] = {"transcription": transcription}
+        # Сохраняем транскрипцию в базе данных
+        db = SessionLocal()
+        user_data = db.query(UserData).filter(
+            UserData.user_id == message.from_user.id
+            ).first()
+        if user_data:
+            user_data.transcription = transcription
+        else:
+            user_data = UserData(
+                user_id=message.from_user.id, transcription=transcription
+                )
+            db.add(user_data)
+        db.commit()
+        db.close()
 
         # Отправляем сообщение с выбором сценария анализа
         await message.answer(
@@ -127,7 +136,7 @@ async def handle_audio(message: Message):
             "1. Стандартная квалификация\n"
             "2. Анализ звонка в проигрыше",
             reply_markup=get_analysis_keyboard()
-            )
+        )
 
     except Exception as e:
         logger.error(f"Ошибка при обработке аудио: {e}")
@@ -137,19 +146,21 @@ async def handle_audio(message: Message):
 # Обработчик выбора "Квалификация"
 @router.callback_query(F.data == "qualification")
 async def handle_qualification(callback: CallbackQuery):
-    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
     await callback.answer()
 
-    user_id = callback.from_user.id
-    transcription = user_data.get(user_id, {}).get("transcription")
+    db = SessionLocal()
+    user_data = db.query(UserData).filter(
+        UserData.user_id == callback.from_user.id
+        ).first()
+    db.close()
 
-    if not transcription:
+    if not user_data or not user_data.transcription:
         await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Анализ текста через ChatGPT по первому промту
     prompt = PROMT_1
-    analysis = await analyze_text(transcription, prompt)
+    analysis = await analyze_text(user_data.transcription, prompt)
     if analysis.startswith("Ошибка"):
         logger.error(f"Ошибка анализа текста: {analysis}")
         await callback.message.answer(analysis)
@@ -174,7 +185,7 @@ async def handle_qualification(callback: CallbackQuery):
     if after_balance is None:
         await callback.message.answer(
             "Не удалось получить баланс после операции."
-            )
+        )
         return
 
     # Отправляем пользователю текущий баланс
@@ -184,19 +195,21 @@ async def handle_qualification(callback: CallbackQuery):
 # Обработчик выбора "Проигрыш"
 @router.callback_query(F.data == "loss")
 async def handle_loss(callback: CallbackQuery):
-    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
     await callback.answer()
 
-    user_id = callback.from_user.id
-    transcription = user_data.get(user_id, {}).get("transcription")
+    db = SessionLocal()
+    user_data = db.query(UserData).filter(
+        UserData.user_id == callback.from_user.id
+        ).first()
+    db.close()
 
-    if not transcription:
+    if not user_data or not user_data.transcription:
         await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Анализ текста через ChatGPT по второму промту
     prompt = PROMT_2
-    analysis = await analyze_text(transcription, prompt)
+    analysis = await analyze_text(user_data.transcription, prompt)
     if analysis.startswith("Ошибка"):
         logger.error(f"Ошибка анализа текста: {analysis}")
         await callback.message.answer(analysis)
@@ -221,7 +234,7 @@ async def handle_loss(callback: CallbackQuery):
     if after_balance is None:
         await callback.message.answer(
             "Не удалось получить баланс после операции."
-            )
+        )
         return
 
     # Отправляем пользователю текущий баланс
@@ -231,18 +244,20 @@ async def handle_loss(callback: CallbackQuery):
 # Обработчик кнопки "Показать транскрибацию"
 @router.callback_query(F.data == "show_transcription")
 async def handle_show_transcription(callback: CallbackQuery):
-    # Отвечаем на callback сразу, чтобы Telegram не закрыл соединение
     await callback.answer()
 
-    user_id = callback.from_user.id
-    transcription = user_data.get(user_id, {}).get("transcription")
+    db = SessionLocal()
+    user_data = db.query(UserData).filter(
+        UserData.user_id == callback.from_user.id
+        ).first()
+    db.close()
 
-    if not transcription:
+    if not user_data or not user_data.transcription:
         await callback.message.answer("Транскрипция не найдена.")
         return
 
     # Разбиваем транскрибацию на части и отправляем
-    transcription_parts = split_message(transcription)
+    transcription_parts = split_message(user_data.transcription)
     for part in transcription_parts:
         try:
             await callback.message.answer(f"Транскрибация:\n{part}")
