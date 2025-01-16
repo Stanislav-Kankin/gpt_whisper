@@ -15,63 +15,76 @@ API-ключ от OpenAI (или ProxyAPI)
 
 ```git clone https://github.com/your_username/your_repository.git```
 
+Перейдите в папку с проектом:
 
 ```cd your_repository```
 
 # 2. Установите зависимости
 
 Создайте виртуальное окружение и установите зависимости:
-
 `python -m venv env`
+
+Активация на Linux:
 `source env/bin/activate`
-`env\Scripts\activate`   # Для Windows: 
+
+Активация на Windows:
+`env\Scripts\activate`
+
+Усталоновите зависимости:
 `pip install -r requirements.txt`
 
-## 3. Настройте переменные окружения
+# 3. Настройте переменные окружения
 Создайте файл .env в корне проекта и добавьте туда следующие переменные:
 
-BOT_TOKEN=your_telegram_bot_token
-PROXY_API_KEY=your_proxy_api_key
+Токен Вашего бота:
+`BOT_TOKEN=your_telegram_bot_token`
 
-4. Запустите бота
-bash
-Copy
-python bot.py
-Запуск на удалённом сервере
+API ключ для доступа к OpenAI:
+`PROXY_API_KEY=your_proxy_api_key`
+
+# 4. Запустите бота
+
+`python bot.py`
+
+Бот работает!
+
+## Запуск на удалённом сервере
 1. Подключитесь к серверу
-Подключитесь к вашему серверу по SSH:
 
-bash
-Copy
-ssh user@your_server_ip
-2. Установите Docker и Docker Compose
+Подключитесь к вашему серверу по SSH:
+`ssh user@your_server_ip`
+
+# 2. Установите Docker и Docker Compose
 Если Docker и Docker Compose ещё не установлены, выполните:
 
-bash
-Copy
-sudo apt update
-sudo apt install docker.io docker-compose
-sudo systemctl enable docker
-sudo systemctl start docker
-3. Клонируйте репозиторий
-Клонируйте репозиторий на сервер:
+`sudo apt update`
+`sudo apt install docker.io docker-compose`
+`sudo systemctl enable docker`
+`sudo systemctl start docker`
 
-bash
-Copy
-git clone https://github.com/your_username/your_repository.git
-cd your_repository
-4. Настройте переменные окружения
+# 3. Клонируйте репозиторий
+
+Клонируйте репозиторий на сервер:
+`git clone https://github.com/your_username/your_repository.git`
+
+Перейдите в папку с проектом:
+`cd your_repository`
+
+# 4. Настройте переменные окружения
 Создайте файл .env в корне проекта и добавьте туда следующие переменные:
 
-bash
-Copy
-BOT_TOKEN=your_telegram_bot_token
-PROXY_API_KEY=your_proxy_api_key
-5. Запустите приложение с помощью Docker Compose
-bash
-Copy
-docker-compose up -d
-Использование Docker
+Токен Вашего бота:
+`BOT_TOKEN=your_telegram_bot_token`
+
+API ключ для доступа к OpenAI:
+`PROXY_API_KEY=your_proxy_api_key`
+
+# 5. Запустите приложение с помощью Docker Compose
+
+`docker-compose up -d`
+
+Использование Docker:
+
 Сборка Docker-образа
 Чтобы собрать Docker-образ вручную, выполните:
 
