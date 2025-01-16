@@ -13,7 +13,7 @@ from utils.promts import PROMT_1, PROMT_2, PROMT_3
 from utils.logging import logger
 from models import SessionLocal, UserData
 
-# Создаем роутер
+# Создаем роутер test for docker
 router = Router()
 
 
