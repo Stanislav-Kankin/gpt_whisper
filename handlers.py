@@ -9,6 +9,7 @@ from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
 from services.balance import get_balance
+from aiogram.enums import ParseMode
 from utils.promts import (
     PROMT_1, PROMT_2,
     PROMT_3, PROMT_4
@@ -86,7 +87,10 @@ def get_analysis_keyboard():
         [InlineKeyboardButton(
             text="Проигрыш", callback_data="loss")],
         [InlineKeyboardButton(
-            text="Общий анализ звонка", callback_data="general_analysis")]
+            text="Общий анализ звонка", callback_data="general_analysis")],
+        [InlineKeyboardButton(
+            text="Проигрыш2(тест)", callback_data="loss2")],
+
     ])
     return keyboard
 
@@ -165,11 +169,25 @@ async def handle_audio(message: Message):
 
         # Отправляем сообщение с выбором сценария анализа
         await message.answer(
-            "Выбери сценарий анализа:\n"
-            "1. Стандартная квалификация\n"
-            "2. Анализ звонка в проигрыше\n"
-            "3. Общий анализ звонка",
-            reply_markup=get_analysis_keyboard()
+            "<u>Выбери сценарий анализа:</u>\n"
+            "\n"
+            "<b>1. Стандартная квалификация:</b>\n"
+            "Этот вариант для фиксации информации в первом"
+            " квалификационном звонке с клиентом(Имя, должность,"
+            " гпр и так далее)\n"
+            "\n"
+            "<b>2. Анализ звонка в проигрыше:</b>\n"
+            "Этот вариант для фиксации информации в проигрыше"
+            " с клиентом и анализ разговора. \n"
+            "\n"
+            "<b>3. Общий анализ звонка:</b>\n"
+            "Этот режимя для резюмирования разговора, если "
+            "нужно вытащить основную суть и зафиксировать всё тезисно\n"
+            "\n"
+            "<b>4. Проигрыш2 (тест)</b>\n"
+            "Пока тестовый промт для анализа проигрыша руководителем.",
+            reply_markup=get_analysis_keyboard(),
+            parse_mode=ParseMode.HTML
         )
 
     except Exception as e:
@@ -229,6 +247,54 @@ async def handle_qualification(callback: CallbackQuery):
 # Обработчик выбора "Проигрыш"
 @router.callback_query(F.data == "loss")
 async def handle_loss(callback: CallbackQuery):
+    await callback.answer()
+
+    db = SessionLocal()
+    user_data = db.query(UserData).filter(
+        UserData.user_id == callback.from_user.id
+        ).first()
+    db.close()
+
+    if not user_data or not user_data.transcription:
+        await callback.message.answer("Транскрипция не найдена.")
+        return
+
+    # Анализ текста через ChatGPT по второму промту
+    prompt = PROMT_2
+    analysis = await analyze_text(user_data.transcription, prompt)
+    if analysis.startswith("Ошибка"):
+        logger.error(f"Ошибка анализа текста: {analysis}")
+        await callback.message.answer(analysis)
+        return
+
+    # Разбиваем анализ на части и отправляем
+    analysis_parts = split_message(analysis)
+    for part in analysis_parts:
+        try:
+            await callback.message.answer(f"Анализ текста:\n{part}")
+        except TelegramBadRequest as e:
+            logger.error(f"Ошибка при отправке части анализа: {e}")
+
+    # Добавляем кнопку "Показать транскрибацию"
+    await callback.message.answer(
+        "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
+        reply_markup=get_transcription_keyboard()
+    )
+
+    # Получаем баланс после выполнения операции
+    after_balance = get_balance()
+    if after_balance is None:
+        await callback.message.answer(
+            "Не удалось получить баланс после операции."
+        )
+        return
+
+    # Отправляем пользователю текущий баланс
+    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
+
+
+@router.callback_query(F.data == "loss2")
+async def handle_loss2(callback: CallbackQuery):
     await callback.answer()
 
     db = SessionLocal()
