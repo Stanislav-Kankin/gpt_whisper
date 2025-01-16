@@ -9,7 +9,10 @@ from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
 from services.balance import get_balance
-from utils.promts import PROMT_1, PROMT_2, PROMT_3
+from utils.promts import (
+    PROMT_1, PROMT_2,
+    PROMT_3, PROMT_4
+    )
 from utils.logging import logger
 from models import SessionLocal, UserData
 
@@ -239,7 +242,7 @@ async def handle_loss(callback: CallbackQuery):
         return
 
     # Анализ текста через ChatGPT по второму промту
-    prompt = PROMT_2
+    prompt = PROMT_4
     analysis = await analyze_text(user_data.transcription, prompt)
     if analysis.startswith("Ошибка"):
         logger.error(f"Ошибка анализа текста: {analysis}")
