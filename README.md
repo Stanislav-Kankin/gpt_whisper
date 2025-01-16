@@ -10,10 +10,12 @@ API-ключ от OpenAI (или ProxyAPI)
 Токен Telegram-бота
 
 ## Запуск локально
-1. Клонируйте репозиторий
-`git clone https://github.com/your_username/your_repository.git`
-`cd your_repository`
-## 2. Установите зависимости
+# 1. Клонируйте репозиторий
+```git clone https://github.com/your_username/your_repository.git```
+```cd your_repository```
+
+# 2. Установите зависимости
+
 Создайте виртуальное окружение и установите зависимости:
 
 `python -m venv env`
