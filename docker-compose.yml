@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  bot:
+    image: my-telegram-bot
+    container_name: my-bot-container
+    restart: always
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}  # Используем переменные окружения
+      - PROXY_API_KEY=${PROXY_API_KEY}
+    build: .
