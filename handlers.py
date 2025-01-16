@@ -1,14 +1,15 @@
 from aiogram import Router, F
 from aiogram.types import (
     Message, CallbackQuery,
-    InlineKeyboardMarkup, InlineKeyboardButton
+    InlineKeyboardMarkup, InlineKeyboardButton,
+    ReplyKeyboardMarkup, KeyboardButton
 )
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 from services.whisper import transcribe_audio
 from services.analyzer import analyze_text
 from services.balance import get_balance
-from utils.promts import PROMT_1, PROMT_2
+from utils.promts import PROMT_1, PROMT_2, PROMT_3
 from utils.logging import logger
 from models import SessionLocal, UserData
 
@@ -41,13 +42,48 @@ def split_message(text: str, max_length: int = 4096) -> list[str]:
     return parts
 
 
+# Создаем клавиатуру с кнопкой "Запросить баланс"
+def get_reply_keyboard():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Запросить баланс")]  # Обычная кнопка
+        ],
+        resize_keyboard=True  # Автоматически подгоняет размер кнопок
+    )
+    return keyboard
+
+
+# Обновляем обработчик команды /start, чтобы показывать клавиатуру
+@router.message(Command("start"))
+async def handle_start(message: Message):
+    await message.answer(
+        "Привет! Отправь мне аудиофайл в формате mp3.",
+        reply_markup=get_reply_keyboard()  # Показываем клавиатуру
+    )
+
+
+# Добавляем обработчик для кнопки "Запросить баланс"
+@router.message(F.text == "Запросить баланс")
+async def handle_balance_button(message: Message):
+    """Обработчик для кнопки 'Запросить баланс'."""
+    balance = get_balance()
+    if balance is None:
+        await message.answer(
+            "Не удалось получить баланс. Проверьте ключ API."
+        )
+        return
+    await message.answer(f"Текущий баланс: {balance} руб.")
+
+
 # Создаем inline кнопки для выбора сценария анализа
 def get_analysis_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="Квалификация", callback_data="qualification"
-        )],
-        [InlineKeyboardButton(text="Проигрыш", callback_data="loss")]
+            text="Квалификация", callback_data="qualification")],
+        [InlineKeyboardButton(
+            text="Проигрыш", callback_data="loss")],
+        [InlineKeyboardButton(
+            text="Общий анализ звонка", callback_data="general_analysis")]
     ])
     return keyboard
 
@@ -60,12 +96,6 @@ def get_transcription_keyboard():
         )]
     ])
     return keyboard
-
-
-# Обработчик команды /start
-@router.message(Command("start"))
-async def handle_start(message: Message):
-    await message.answer("Привет! Отправь мне аудиофайл в формате mp3.")
 
 
 # Обработчик команды /balance
@@ -134,7 +164,8 @@ async def handle_audio(message: Message):
         await message.answer(
             "Выбери сценарий анализа:\n"
             "1. Стандартная квалификация\n"
-            "2. Анализ звонка в проигрыше",
+            "2. Анализ звонка в проигрыше\n"
+            "3. Общий анализ звонка",
             reply_markup=get_analysis_keyboard()
         )
 
@@ -220,6 +251,55 @@ async def handle_loss(callback: CallbackQuery):
     for part in analysis_parts:
         try:
             await callback.message.answer(f"Анализ текста:\n{part}")
+        except TelegramBadRequest as e:
+            logger.error(f"Ошибка при отправке части анализа: {e}")
+
+    # Добавляем кнопку "Показать транскрибацию"
+    await callback.message.answer(
+        "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
+        reply_markup=get_transcription_keyboard()
+    )
+
+    # Получаем баланс после выполнения операции
+    after_balance = get_balance()
+    if after_balance is None:
+        await callback.message.answer(
+            "Не удалось получить баланс после операции."
+        )
+        return
+
+    # Отправляем пользователю текущий баланс
+    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
+
+
+# Добавляем новый обработчик для общего анализа звонка
+@router.callback_query(F.data == "general_analysis")
+async def handle_general_analysis(callback: CallbackQuery):
+    await callback.answer()
+
+    db = SessionLocal()
+    user_data = db.query(UserData).filter(
+        UserData.user_id == callback.from_user.id
+        ).first()
+    db.close()
+
+    if not user_data or not user_data.transcription:
+        await callback.message.answer("Транскрипция не найдена.")
+        return
+
+    # Анализ текста через ChatGPT по третьему промту
+    prompt = PROMT_3
+    analysis = await analyze_text(user_data.transcription, prompt)
+    if analysis.startswith("Ошибка"):
+        logger.error(f"Ошибка анализа текста: {analysis}")
+        await callback.message.answer(analysis)
+        return
+
+    # Разбиваем анализ на части и отправляем
+    analysis_parts = split_message(analysis)
+    for part in analysis_parts:
+        try:
+            await callback.message.answer(f"Общий анализ звонка:\n{part}")
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
