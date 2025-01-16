@@ -17,7 +17,7 @@ from utils.promts import (
 from utils.logging import logger
 from models import SessionLocal, UserData
 
-# Создаем роутер test for docker
+# Создаем роутер
 router = Router()
 
 
@@ -124,14 +124,6 @@ async def handle_audio(message: Message):
     try:
         logger.info(f"Получено аудио от пользователя {message.from_user.id}")
 
-        # Получаем баланс до выполнения операции
-        before_balance = get_balance()
-        if before_balance is None:
-            await message.answer(
-                "Не удалось получить баланс. Проверьте ключ API."
-            )
-            return
-
         # Скачиваем аудиофайл
         file_id = message.audio.file_id
         file = await message.bot.get_file(file_id)
@@ -232,17 +224,6 @@ async def handle_qualification(callback: CallbackQuery):
         reply_markup=get_transcription_keyboard()
     )
 
-    # Получаем баланс после выполнения операции
-    after_balance = get_balance()
-    if after_balance is None:
-        await callback.message.answer(
-            "Не удалось получить баланс после операции."
-        )
-        return
-
-    # Отправляем пользователю текущий баланс
-    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
-
 
 # Обработчик выбора "Проигрыш"
 @router.callback_query(F.data == "loss")
@@ -281,17 +262,6 @@ async def handle_loss(callback: CallbackQuery):
         reply_markup=get_transcription_keyboard()
     )
 
-    # Получаем баланс после выполнения операции
-    after_balance = get_balance()
-    if after_balance is None:
-        await callback.message.answer(
-            "Не удалось получить баланс после операции."
-        )
-        return
-
-    # Отправляем пользователю текущий баланс
-    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
-
 
 @router.callback_query(F.data == "loss2")
 async def handle_loss2(callback: CallbackQuery):
@@ -328,17 +298,6 @@ async def handle_loss2(callback: CallbackQuery):
         "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
         reply_markup=get_transcription_keyboard()
     )
-
-    # Получаем баланс после выполнения операции
-    after_balance = get_balance()
-    if after_balance is None:
-        await callback.message.answer(
-            "Не удалось получить баланс после операции."
-        )
-        return
-
-    # Отправляем пользователю текущий баланс
-    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
 
 # Добавляем новый обработчик для общего анализа звонка
@@ -377,17 +336,6 @@ async def handle_general_analysis(callback: CallbackQuery):
         "Нажмите кнопку ниже, чтобы увидеть транскрибацию:",
         reply_markup=get_transcription_keyboard()
     )
-
-    # Получаем баланс после выполнения операции
-    after_balance = get_balance()
-    if after_balance is None:
-        await callback.message.answer(
-            "Не удалось получить баланс после операции."
-        )
-        return
-
-    # Отправляем пользователю текущий баланс
-    await callback.message.answer(f"Текущий баланс: {after_balance} руб.")
 
 
 # Обработчик кнопки "Показать транскрибацию"

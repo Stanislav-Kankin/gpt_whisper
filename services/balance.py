@@ -19,29 +19,16 @@ def get_balance() -> float:
 
         # Отправляем GET-запрос
         response = requests.get(url, headers=headers)
-
+        error = 'Ошибка при получении баланса:'
         # Проверяем ответ
         if response.status_code == 200:
             balance = response.json().get("balance")
             return float(balance)  # Преобразуем баланс в число
         else:
             logger.error(
-                f"Ошибка при получении баланса: {response.status_code}, {response.text}"
+                f"{error} {response.status_code}, {response.text}"
                 )
             return None
     except Exception as e:
         logger.error(f"Ошибка при получении баланса: {e}")
         return None
-
-
-def calculate_cost(before_balance: float, after_balance: float) -> float:
-    """
-    Рассчитывает стоимость операции на основе изменения баланса.
-    Возвращает стоимость в рублях.
-    """
-    if before_balance is None or after_balance is None:
-        logger.error("Не удалось получить баланс для расчета стоимости.")
-        return 0.0
-
-    cost = before_balance - after_balance
-    return round(cost, 4)  # Округляем до 4 знаков после запятой
