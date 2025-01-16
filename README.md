@@ -27,3 +27,16 @@ GPT и Whisper Telegram Bot
     source env/bin/activate  # Linux
     env\Scripts\activate     # Windows
     pip install -r requirements.txt
+
+4. Настройте переменные окружения:
+
+Создайте файл .env в корне проекта и добавьте туда:
+
+    ```bash
+    BOT_TOKEN=your_telegram_bot_token
+    PROXY_API_KEY=your_proxy_api_key
+
+5. Запустите бота:
+
+    ```bash
+    python bot.py
