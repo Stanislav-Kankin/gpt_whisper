@@ -330,7 +330,7 @@ async def handle_general_analysis(callback: CallbackQuery):
     if analysis.startswith("Ошибка"):
         logger.error(f"Ошибка анализа текста: {analysis}")
         await callback.message.answer(
-            f'<b>Общий анализ звонка:\n</b> {analysis}',
+            f'<b>Общий анализ звонка:</b>\n{analysis}',
             parse_mode=ParseMode.HTML
             )
         return
