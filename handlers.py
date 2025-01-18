@@ -215,7 +215,7 @@ async def handle_qualification(callback: CallbackQuery):
     for part in analysis_parts:
         try:
             await callback.message.answer(
-                f"Анализ текста, квалификация PreSale:\n{part}",
+                f"<b>Анализ текста, квалификация PreSale:</b>\n{part}",
                 parse_mode=ParseMode.HTML
                 )
         except TelegramBadRequest as e:
