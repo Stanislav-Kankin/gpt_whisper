@@ -214,7 +214,10 @@ async def handle_qualification(callback: CallbackQuery):
     analysis_parts = split_message(analysis)
     for part in analysis_parts:
         try:
-            await callback.message.answer(f"Анализ текста:\n{part}")
+            await callback.message.answer(
+                f"Анализ текста, квалификация PreSale:\n{part}",
+                parse_mode=ParseMode.HTML
+                )
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
@@ -252,7 +255,10 @@ async def handle_loss(callback: CallbackQuery):
     analysis_parts = split_message(analysis)
     for part in analysis_parts:
         try:
-            await callback.message.answer(f"Анализ текста:\n{part}")
+            await callback.message.answer(
+                f"<b>Проигрыш:</b>\n{part}",
+                parse_mode=ParseMode.HTML
+                )
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
@@ -289,7 +295,10 @@ async def handle_loss2(callback: CallbackQuery):
     analysis_parts = split_message(analysis)
     for part in analysis_parts:
         try:
-            await callback.message.answer(f"Анализ текста:\n{part}")
+            await callback.message.answer(
+                f"<b>Анализ проигрыша(руководитель):</b>\n{part}",
+                parse_mode=ParseMode.HTML
+                )
         except TelegramBadRequest as e:
             logger.error(f"Ошибка при отправке части анализа: {e}")
 
@@ -320,7 +329,10 @@ async def handle_general_analysis(callback: CallbackQuery):
     analysis = await analyze_text(user_data.transcription, prompt)
     if analysis.startswith("Ошибка"):
         logger.error(f"Ошибка анализа текста: {analysis}")
-        await callback.message.answer(analysis)
+        await callback.message.answer(
+            f'<b>Общий анализ звонка:\n</b> {analysis}',
+            parse_mode=ParseMode.HTML
+            )
         return
 
     # Разбиваем анализ на части и отправляем
