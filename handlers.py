@@ -61,7 +61,9 @@ def get_reply_keyboard():
 @router.message(Command("start"))
 async def handle_start(message: Message):
     await message.answer(
-        "Привет! Отправь мне аудиофайл в формате mp3.",
+        "Привет! Отправь мне аудиофайл в формате mp3."
+        " Я сделаю транскрибацию и потом предложу тебе "
+        "сценарий для обработки.",
         reply_markup=get_reply_keyboard()  # Показываем клавиатуру
     )
 
@@ -76,7 +78,9 @@ async def handle_balance_button(message: Message):
             "Не удалось получить баланс. Проверьте ключ API."
         )
         return
-    await message.answer(f"Текущий баланс: {balance} руб.")
+    await message.answer(
+        f"<b>Текущий баланс:</b> <u>{balance} руб.</u>"
+        )
 
 
 # Создаем inline кнопки для выбора сценария анализа
