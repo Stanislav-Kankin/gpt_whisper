@@ -1,0 +1,269 @@
+[33mcommit a40368e56c3fd4448a22155615bef51b84203116[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 15:46:36 2025 +0300
+
+    try to return
+
+[33mcommit f73647173e34d998da56f509a21f4f3452966d50[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 15:43:08 2025 +0300
+
+    n
+
+[33mcommit 0aba5c6fb22d4a96ef6d9069c764c51176399562[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 15:31:58 2025 +0300
+
+    numpy
+
+[33mcommit b03238e53a5b16a992ac45dce6c2f3b8ccb31f15[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 15:20:59 2025 +0300
+
+    add video
+
+[33mcommit 01c8847542b5a6659de6f23e01ceee3f7c7cdf7f[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 14:56:16 2025 +0300
+
+    дипсик модель
+
+[33mcommit 4c392815219a21d7e598fc26382f5702f6628f1e[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 14:52:22 2025 +0300
+
+    ф
+
+[33mcommit 5cebab8013561d331c16352ce04817063352d4b8[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Mon Feb 24 14:45:00 2025 +0300
+
+    тестируем дипсик
+
+[33mcommit b651dbdd7bce502d8f5549e644a56674b6611817[m
+Author: Stanislav.Kankin <stanislav.kankin@gmail.com>
+Date:   Fri Feb 14 09:08:24 2025 +0300
+
+    новый промт
+
+[33mcommit 3a3d1a80a7902ea8dfeac07177a0e02d47ae32ac[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 23 17:00:36 2025 +0300
+
+    поправил промт
+
+[33mcommit f64eb272fe00a54cb42b6a8e838c14b9b8807445[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Tue Jan 21 10:57:41 2025 +0300
+
+    новый промт 3
+
+[33mcommit 2114a3ff8de96bcd5cee5a4ffb85a1482a8bdc1c[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Tue Jan 21 10:50:28 2025 +0300
+
+    еще чуть промт
+
+[33mcommit 71f3bb51cd931a974fe35b8813f666a7d08dc7ac[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Tue Jan 21 10:47:29 2025 +0300
+
+    поменял промт
+
+[33mcommit 969b083a2f72813a87c126745d3f0718f29ad4b9[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Mon Jan 20 14:49:34 2025 +0300
+
+    чуть поправил вывод
+
+[33mcommit a56a5c09cd2a61ed42cf6506ed1f3e54a8404f9a[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:32:54 2025 +0300
+
+    ` -> "
+
+[33mcommit 7903eadd20bd2f765c3f566858c6967ad24c91e2[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:26:11 2025 +0300
+
+    yjdsq dsdjl
+
+[33mcommit 33f6ce596aab5eb74952db97f7bbccace20baba7[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:23:43 2025 +0300
+
+    dd
+
+[33mcommit 8d0f62f33b750f5284f66f931c517240a764cf08[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:20:33 2025 +0300
+
+    d
+
+[33mcommit f2573f4e1e350d08ede4ea6bde6338ffbf5a08c7[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:12:46 2025 +0300
+
+    редактировал вывод сообщений после квалификации
+
+[33mcommit e75e5389b57c67e743175c79eebda9f4ff9cb281[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sat Jan 18 19:05:22 2025 +0300
+
+    новый промт общего анализа звонков
+
+[33mcommit 8304462f0d5bc8ca5da49e6693aab33ad334c188[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Fri Jan 17 13:00:01 2025 +0300
+
+    поправил промт
+
+[33mcommit cdbff9fc5868455e6c36be88b12e3db52d922b20[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Fri Jan 17 09:04:34 2025 +0300
+
+    еще поправил промт
+
+[33mcommit 1e09805e5fb76ff8128a49e2992dbe455141317b[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Fri Jan 17 09:01:30 2025 +0300
+
+    промт поправил
+
+[33mcommit a57a59cc38be54aa87907a5e4c0275913e01ca02[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 14:40:11 2025 +0300
+
+    убрал вывод баланса
+
+[33mcommit d1c5ccf26ac1031ddde4c662711a313b758a71fa[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 14:27:59 2025 +0300
+
+    add ine more button
+
+[33mcommit 09a4e2e5c098500a12120095325a5e5b00038661[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 14:08:58 2025 +0300
+
+    add 4 promt
+
+[33mcommit c473081be20e56716af7c667bdd2bcd765d180d8[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 11:20:22 2025 +0300
+
+    done readme
+
+[33mcommit 1779679db7fc7286bc8166a1b710a2e18c8db3d7[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 11:08:43 2025 +0300
+
+    new
+
+[33mcommit b370e2dd31804a8e0943c71b8dc37f33515fbf31[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 11:06:17 2025 +0300
+
+    new README
+
+[33mcommit 8e2863b4e9a5666b110d0e36b193ad456e9f356e[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 10:50:33 2025 +0300
+
+    потом доделаю
+
+[33mcommit e5c065965fe203d2f6f1c00b842202839bed507b[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 10:43:29 2025 +0300
+
+    test
+
+[33mcommit 335d1f0695d14279d517561abe5f4a0a015b27ab[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 10:42:50 2025 +0300
+
+    test
+
+[33mcommit 019d65a2351c99f38f4950d1b93f32e422e6232f[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 10:39:17 2025 +0300
+
+    пробую ридми
+
+[33mcommit 6596a6f584cf9e95bd707e3bd92bac5faed5dc53[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 09:53:23 2025 +0300
+
+    test
+
+[33mcommit 48611bdfa33932b22ce055a0e956a35f6cf0355e[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 09:48:07 2025 +0300
+
+    add compose
+
+[33mcommit 312034ab0f6846a1c6c0ad30e1a1cb0ee5c580d8[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 09:36:18 2025 +0300
+
+    add docker
+
+[33mcommit f901a5151f03168f656919511a38b68b2eece123[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Thu Jan 16 09:02:24 2025 +0300
+
+    добавил 3 промт, кнопку баланса
+
+[33mcommit 159a7a1e0938fccc06fd44864c310bcc86070f76[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Wed Jan 15 10:44:27 2025 +0300
+
+    промт
+
+[33mcommit 958095b4e656c7c921ba381a2cbb12e1c98ead25[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Wed Jan 15 09:49:08 2025 +0300
+
+    финальый промт
+
+[33mcommit 059effd281ccf52d1d16a080061940353656705e[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Wed Jan 15 09:17:27 2025 +0300
+
+    поправил промт
+
+[33mcommit b0ff8968ecabc22d0eeb7f82508fa3300c2d9ff1[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Tue Jan 14 18:16:52 2025 +0300
+
+    добавил бд
+
+[33mcommit 5f164bb5958a0fca88be9489ec35f78745ea5116[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Tue Jan 14 11:23:42 2025 +0300
+
+    поправил промты
+
+[33mcommit ca5489718730eab254db96a7e41bf8eb50e6bd6a[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Mon Jan 13 15:07:06 2025 +0300
+
+    поправил вывод в хэндлеры
+
+[33mcommit 397ff58742d1c9bdecf83d2f9ece11aa1c6402a6[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Mon Jan 13 14:48:47 2025 +0300
+
+    убрал лишнее с .енв, поправил код по пеп8
+
+[33mcommit b82b69839e2a730d224fc35b01ba4159e1c95e02[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Mon Jan 13 09:49:54 2025 +0300
+
+    поменял модель для анализа токенов
+
+[33mcommit e50087f1007163047f7b62cbc8664efe6b6428f2[m
+Author: Stnislav-Kankin <stanislav.kankin@yandex.ru>
+Date:   Sun Jan 12 20:23:22 2025 +0300
+
+    сделал вывод транскрибации, добав
