@@ -16,8 +16,6 @@ from utils.promts import (
     )
 from utils.logging import logger
 from models import SessionLocal, UserData
-from services.video_processing import extract_audio_from_video
-
 
 # Создаем роутер
 router = Router()
