@@ -22,7 +22,7 @@ async def analyze_text(text: str, prompt: str) -> str:
         try:
             # Формируем запрос к ChatGPT
             response = client.chat.completions.create(
-                model="deepseek-chat",  # Модель ChatGPT
+                model="gpt-4o",  # Модель ChatGPT gpt-4o / deepseek-chat
                 messages=[
                     {"role": "system", "content": prompt},  # Промт для анализа
                     {"role": "user", "content": text}  # Текст для анализа
