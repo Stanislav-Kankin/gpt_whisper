@@ -3,10 +3,9 @@ from config import config
 from utils.logging import logger
 import asyncio
 
-# Инициализация клиента OpenAI с использованием ProxyAPI
 client = OpenAI(
-    api_key=config.PROXY_API_KEY,  # Ваш ключ ProxyAPI
-    base_url="https://api.proxyapi.ru/openai/v1"  # Базовый URL ProxyAPI
+    api_key=config.PROXY_API_KEY,
+    base_url="https://api.proxyapi.ru/openai/v1"
 )
 
 # Ограничение на 5 одновременных запросов
@@ -28,14 +27,14 @@ async def transcribe_audio(
                 transcription = client.audio.transcriptions.create(
                     file=audio_file,
                     model="whisper-1",
-                    language=language,  # Указываем язык, если известен
+                    language=language,
                     response_format="verbose_json" if return_timestamps else "json"
                 )
             if return_timestamps:
                 # Формируем текст с временными метками
                 text_with_timestamps = []
                 for segment in transcription.segments:
-                    start_time = segment.start  # Используем атрибуты объекта
+                    start_time = segment.start
                     end_time = segment.end
                     text = segment.text
                     text_with_timestamps.append(
