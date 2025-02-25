@@ -16,6 +16,8 @@ from utils.promts import (
     )
 from utils.logging import logger
 from models import SessionLocal, UserData
+from services.whisper import transcribe_audio, extract_audio_from_video
+import os
 
 # Создаем роутер
 router = Router()
@@ -192,6 +194,92 @@ async def handle_audio(message: Message):
     except Exception as e:
         logger.error(f"Ошибка при обработке аудио: {e}")
         await message.answer(f"Произошла ошибка при обработке аудио: {e}")
+
+
+@router.message(F.video)
+async def handle_video(message: Message):
+    try:
+        logger.info(f"Получено видео от пользователя {message.from_user.id}")
+
+        # Скачиваем видеофайл
+        file_id = message.video.file_id
+        file = await message.bot.get_file(file_id)
+        file_path = file.file_path
+        await message.bot.download_file(file_path, "video.mp4")
+        logger.info("Видеофайл успешно скачан")
+        await message.answer("Скачал файл, извлекаю аудио...")
+
+        # Извлекаем аудио из видео
+        audio_path = await extract_audio_from_video("video.mp4")
+        if audio_path is None:
+            await message.answer("Не удалось извлечь аудио из видео.")
+            return
+
+        await message.answer("Аудио извлечено, идёт транскрибация.")
+
+        # Транскрибация через OpenAI Whisper с временными метками
+        transcription = await transcribe_audio(
+            audio_path, return_timestamps=True
+        )
+        if transcription.startswith("Ошибка"):
+            logger.error(f"Ошибка транскрибации: {transcription}")
+            await message.answer(transcription)
+            return
+
+        logger.info("Транскрибация завершена")
+        logger.info(f"Длина транскрипции: {len(transcription)} символов")
+
+        # Сохраняем транскрипцию в базе данных
+        db = SessionLocal()
+        user_data = db.query(UserData).filter(
+            UserData.user_id == message.from_user.id
+            ).first()
+        if user_data:
+            user_data.transcription = transcription
+        else:
+            user_data = UserData(
+                user_id=message.from_user.id, transcription=transcription
+                )
+            db.add(user_data)
+        db.commit()
+        db.close()
+
+        # Отправляем сообщение с выбором сценария анализа
+        await message.answer(
+            "Я закончил транскрибацию звонка, ниже ты"
+            " можешь найти варинаты анализа, обращай внимание"
+            " на актуальность сценария.\n"
+            "<u>Выбери сценарий анализа:</u>\n"
+            "\n"
+            "<b>1. Стандартная квалификация:</b>\n"
+            "Этот вариант для фиксации информации в первом"
+            " квалификационном звонке с клиентом(Имя, должность,"
+            " гпр и так далее)\n"
+            "\n"
+            "<b>2. Анализ звонка в проигрыше:</b>\n"
+            "Этот вариант для фиксации информации в проигрыше"
+            " с клиентом и анализ разговора. \n"
+            "\n"
+            "<b>3. Общий анализ звонка:</b>\n"
+            "Этот режимя для резюмирования разговора, если "
+            "нужно вытащить основную суть и зафиксировать всё тезисно\n"
+            "\n"
+            "<b>4. Проигрыш2 (тест)</b>\n"
+            "Пока тестовый промт для анализа проигрыша руководителем.",
+            reply_markup=get_analysis_keyboard(),
+            parse_mode=ParseMode.HTML
+        )
+
+    except Exception as e:
+        logger.error(f"Ошибка при обработке видео: {e}")
+        await message.answer(f"Произошла ошибка при обработке видео: {e}")
+
+    finally:
+        # Удаляем временные файлы
+        if os.path.exists("video.mp4"):
+            os.remove("video.mp4")
+        if os.path.exists("extracted_audio.mp3"):
+            os.remove("extracted_audio.mp3")
 
 
 # Обработчик выбора "Квалификация"

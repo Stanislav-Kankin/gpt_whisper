@@ -2,6 +2,7 @@ from openai import OpenAI
 from config import config
 from utils.logging import logger
 import asyncio
+from moviepy.editor import VideoFileClip
 
 client = OpenAI(
     api_key=config.PROXY_API_KEY,
@@ -10,6 +11,20 @@ client = OpenAI(
 
 # Ограничение на 5 одновременных запросов
 semaphore = asyncio.Semaphore(5)
+
+
+async def extract_audio_from_video(video_path: str, audio_path: str = "extracted_audio.mp3") -> str:
+    """
+    Извлекает аудио из видеофайла и сохраняет его в формате mp3.
+    Возвращает путь к извлеченному аудиофайлу.
+    """
+    try:
+        video = VideoFileClip(video_path)
+        video.audio.write_audiofile(audio_path)
+        return audio_path
+    except Exception as e:
+        logger.error(f"Ошибка при извлечении аудио из видео: {e}")
+        return None
 
 
 async def transcribe_audio(
