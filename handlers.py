@@ -6,7 +6,7 @@ from aiogram.types import (
 )
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
-from services.whisper import transcribe_audio
+from services.whisper import transcribe_audio, extract_audio_from_video
 from services.analyzer import analyze_text
 from services.balance import get_balance
 from aiogram.enums import ParseMode
@@ -16,7 +16,6 @@ from utils.promts import (
     )
 from utils.logging import logger
 from models import SessionLocal, UserData
-from services.whisper import transcribe_audio, extract_audio_from_video
 import os
 
 # Создаем роутер
