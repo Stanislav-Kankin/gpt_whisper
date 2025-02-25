@@ -24,7 +24,7 @@ imageio-ffmpeg==0.6.0
 jiter==0.8.2
 joblib==1.4.2
 magic-filter==1.0.12
-moviepy==2.1.2
+moviepy==1.0.3
 multidict==6.1.0
 nltk==3.9.1
 numpy==2.2.3
