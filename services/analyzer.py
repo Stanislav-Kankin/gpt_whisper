@@ -22,7 +22,7 @@ async def analyze_text(text: str, prompt: str) -> str:
         try:
             # Формируем запрос к ChatGPT
             response = client.chat.completions.create(
-                model="gpt-4o",  # Модель ChatGPT gpt-4o
+                model="gpt-4o-mini",  # Модель ChatGPT gpt-4o
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": text}
