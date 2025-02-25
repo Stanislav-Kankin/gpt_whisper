@@ -3,6 +3,8 @@ from config import config
 from utils.logging import logger
 import asyncio
 from moviepy.editor import VideoFileClip
+import subprocess
+
 
 client = OpenAI(
     api_key=config.PROXY_API_KEY,
@@ -24,6 +26,39 @@ async def extract_audio_from_video(video_path: str, audio_path: str = "extracted
         return audio_path
     except Exception as e:
         logger.error(f"Ошибка при извлечении аудио из видео: {e}")
+        return None
+
+
+async def compress_video_and_extract_audio(video_path: str, compressed_video_path: str, audio_path: str = "extracted_audio.mp3") -> str:
+    """
+    Сжимает видео и извлекает аудиодорожку в формате mp3.
+    Возвращает путь к извлеченному аудиофайлу.
+    """
+    try:
+        # Сжимаем видео
+        compress_command = [
+            'ffmpeg',
+            '-i', video_path,
+            '-vf', 'scale=1280:720',  # Уменьшаем разрешение до 1280x720
+            '-crf', '23',  # Устанавливаем константу качества
+            '-c:a', 'copy',  # Копируем аудиодорожку без изменений
+            compressed_video_path
+        ]
+        subprocess.run(compress_command, check=True)
+
+        # Извлекаем аудио из сжатого видео
+        extract_command = [
+            'ffmpeg',
+            '-i', compressed_video_path,
+            '-q:a', '0',  # Устанавливаем качество аудио
+            '-map', 'a',  # Извлекаем только аудиодорожку
+            audio_path
+        ]
+        subprocess.run(extract_command, check=True)
+
+        return audio_path
+    except Exception as e:
+        logger.error(f"Ошибка при сжатии видео или извлечении аудио: {e}")
         return None
 
 

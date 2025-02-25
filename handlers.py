@@ -6,7 +6,7 @@ from aiogram.types import (
 )
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
-from services.whisper import transcribe_audio, extract_audio_from_video
+from services.whisper import transcribe_audio, compress_video_and_extract_audio
 from services.analyzer import analyze_text
 from services.balance import get_balance
 from aiogram.enums import ParseMode
@@ -206,10 +206,10 @@ async def handle_video(message: Message):
         file_path = file.file_path
         await message.bot.download_file(file_path, "video.mp4")
         logger.info("Видеофайл успешно скачан")
-        await message.answer("Скачал файл, извлекаю аудио...")
+        await message.answer("Скачал файл, сжимаю видео и извлекаю аудио...")
 
-        # Извлекаем аудио из видео
-        audio_path = await extract_audio_from_video("video.mp4")
+        # Сжимаем видео и извлекаем аудио
+        audio_path = await compress_video_and_extract_audio("video.mp4", "compressed_video.mp4")
         if audio_path is None:
             await message.answer("Не удалось извлечь аудио из видео.")
             return
@@ -246,7 +246,7 @@ async def handle_video(message: Message):
         # Отправляем сообщение с выбором сценария анализа
         await message.answer(
             "Я закончил транскрибацию звонка, ниже ты"
-            " можешь найти варинаты анализа, обращай внимание"
+            " можешь найти варианты анализа, обращай внимание"
             " на актуальность сценария.\n"
             "<u>Выбери сценарий анализа:</u>\n"
             "\n"
@@ -260,7 +260,7 @@ async def handle_video(message: Message):
             " с клиентом и анализ разговора. \n"
             "\n"
             "<b>3. Общий анализ звонка:</b>\n"
-            "Этот режимя для резюмирования разговора, если "
+            "Этот режим для резюмирования разговора, если "
             "нужно вытащить основную суть и зафиксировать всё тезисно\n"
             "\n"
             "<b>4. Проигрыш2 (тест)</b>\n"
@@ -277,6 +277,8 @@ async def handle_video(message: Message):
         # Удаляем временные файлы
         if os.path.exists("video.mp4"):
             os.remove("video.mp4")
+        if os.path.exists("compressed_video.mp4"):
+            os.remove("compressed_video.mp4")
         if os.path.exists("extracted_audio.mp3"):
             os.remove("extracted_audio.mp3")
 
