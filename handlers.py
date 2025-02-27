@@ -95,7 +95,8 @@ def get_analysis_keyboard():
             text="Общий анализ звонка", callback_data="general_analysis")],
         [InlineKeyboardButton(
             text="Проигрыш2(тест)", callback_data="loss2")],
-
+        [InlineKeyboardButton(
+            text="Показать транскрибацию", callback_data="show_transcription")]
     ])
     return keyboard
 
